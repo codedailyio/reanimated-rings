@@ -1,26 +1,50 @@
+import React, { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, {
-  useSharedValue,
-  withTiming,
   useAnimatedStyle,
-  Easing,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
+  interpolate,
 } from "react-native-reanimated";
-import { View, Button } from "react-native";
-import React from "react";
 
-export default function AnimatedStyleUpdateExample(props) {
-  const randomWidth = useSharedValue(10);
+const Ring = ({ delay }) => {
+  const ring = useSharedValue(0);
 
-  const config = {
-    duration: 500,
-    easing: Easing.bezier(0.5, 0.01, 0, 1),
-  };
-
-  const style = useAnimatedStyle(() => {
+  const ringStyle = useAnimatedStyle(() => {
     return {
-      width: withTiming(randomWidth.value, config),
+      opacity: 0.8 - ring.value,
+      transform: [
+        {
+          // Old interpolate
+          scale: interpolate(ring.value, [0, 1], [0, 4]),
+          // Correct method below but doesn't work with Expo until it updates to stable 2.0
+          // scale: interpolateNode(ring.value, {
+          //   inputRange: [0, 1],
+          //   outputRange: [0, 4],
+          //   extrapolate: Extrapolate.CLAMP,
+          // }),
+        },
+      ],
     };
   });
+  useEffect(() => {
+    ring.value = withDelay(
+      delay,
+      withRepeat(
+        withTiming(1, {
+          duration: 4000,
+        }),
+        999999,
+        false
+      )
+    );
+  }, []);
+  return <Animated.View style={[styles.ring, ringStyle]} />;
+};
 
+export default function AnimatedRingExample() {
   return (
     <View
       style={{
@@ -30,18 +54,26 @@ export default function AnimatedStyleUpdateExample(props) {
         flexDirection: "column",
       }}
     >
-      <Animated.View
-        style={[
-          { width: 100, height: 80, backgroundColor: "black", margin: 30 },
-          style,
-        ]}
-      />
-      <Button
-        title="toggle"
-        onPress={() => {
-          randomWidth.value = Math.random() * 350;
-        }}
-      />
+      <Ring delay={0} />
+      <Ring delay={1000} />
+      <Ring delay={2000} />
+      <Ring delay={3000} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: "tomato",
+  },
+  ring: {
+    position: "absolute",
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderColor: "tomato",
+    borderWidth: 10,
+  },
+});
