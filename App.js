@@ -17,14 +17,7 @@ const Ring = ({ delay }) => {
       opacity: 0.8 - ring.value,
       transform: [
         {
-          // Old interpolate
           scale: interpolate(ring.value, [0, 1], [0, 4]),
-          // Correct method below but doesn't work with Expo until it updates to stable 2.0
-          // scale: interpolateNode(ring.value, {
-          //   inputRange: [0, 1],
-          //   outputRange: [0, 4],
-          //   extrapolate: Extrapolate.CLAMP,
-          // }),
         },
       ],
     };
@@ -36,7 +29,7 @@ const Ring = ({ delay }) => {
         withTiming(1, {
           duration: 4000,
         }),
-        999999,
+        -1,
         false
       )
     );
